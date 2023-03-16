@@ -1,0 +1,39 @@
+---
+name: Checks
+
+on: [push]
+#we want this github action to run on push,meaning any push of changes to our project.
+#Any time we push to github, it's gonna run the "jobs" we specify inside this yaml file.
+
+jobs:
+  test-lint:
+    #define a job call test-lint, it's ID used to be referenced somewhere else inside out actions.
+
+    name: Test and Lint
+    #this is the human-friendly  name,displayed on the github actions interface.
+
+    runs-on: ubuntu-20.04
+    #a runner(a OS) we're gonna be running our job on.
+    #there are a lot of other runner we can choose.
+
+    steps:
+      - name: Login to Docker Hub
+      - uses: docker/login-action@v1
+        #action is just a Docker container and a Docker configuration that's setup to perform a certain task.
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout
+        #action provided by github automatically
+        #it checks our code out inside our github actions job.
+        #we need to do this is because by default the code is not checked out inside the job that we're running.
+        uses: actions/checkout@v2
+        #basic action, 主要作用:把repo加到runner的某個資料夾中，後續的step便可取用到repo裡面的資料
+        #我們要用他是因為we want to make sure the code is available when we run the next step on.
+      - name: Test
+        run: docker-compose run -rm app sh -c "python manage.py test"
+        #command running the unit tests on our project.
+      - name: Lint
+        run: docker-compose run -rm app sh -c "flake8"
+        #So 每次push都會run 一次linter
+        #可以發現必須得用checkout，這樣這兩個step才取的到在repo裡面的manage.py 和 flake8 套件

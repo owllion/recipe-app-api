@@ -1,0 +1,25 @@
+version: "3.9"
+#The version of the Docker compose syntax we're gonna use.
+#Just to make sure if there's new version,it would not break our configuration.
+services:
+  #typically Docker compose consist of one or more services that's needed for your app.
+  app:
+    build:
+      context: .
+      #This means we want to build the Dockerfile inside our current directory.
+      #So the context we're gonna use for  app service is the root directory that we're running the the Docker compose from.
+      args:
+        - DEV=true
+        #means: if we're running using this docker-compose,which we're only gonna use it for development,we set the dev to true
+    ports:
+      - "8000:8000"
+    #maps por 8000 on local machine, and 8000 inside our Docker container.
+    #This is how we can access the network when we want to connect to our server
+    volumes:
+      #is a way of mapping directories from our sysrem into the Docker container.
+      - ./app:/app
+      #左邊就是我們的app資料夾，右邊就是在container的app
+      #The reason we add this is because we want the updates that we make to our code in our local project to be reflected in the running container in real time! We do not have to rebuild our container everytime we change a line of code,we want to automatically sync the code in our project to the cloud running the container.
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    #Command is used to run the service.By default 如果沒有specify command,他就會跑來run這個指令喔!還記得前面有教到的docker指令的部分媽? 這邊就是那個後半部的指令(前半部是Docker compose syntax)~如果我們沒有在cmd特別寫啥指令，最後就是會執行這裡的!
