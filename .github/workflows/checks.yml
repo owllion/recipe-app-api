@@ -27,7 +27,7 @@ jobs:
         #action provided by github automatically
         #it checks our code out inside our github actions job.
         #we need to do this is because by default the code is not checked out inside the job that we're running.
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         #basic action, 主要作用:把repo加到runner的某個資料夾中，後續的step便可取用到repo裡面的資料
         #我們要用他是因為we want to make sure the code is available when we run the next step on.
       - name: Test
