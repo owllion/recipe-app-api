@@ -36,6 +36,19 @@ RUN python -m venv /py && \
 
     /py/bin/pip install --upgrade pip &&\
     #update pip(python package manager) inside our virtual env
+
+    #安裝postgresql adaptor(為了讓django可和db連接)所需的套件!
+    apk add --update --no-cache postgresql-client && \
+    #It's the client package that we're gonna install inside our Alpine image in order for psycopg2 to be able to connect to Postgresql.
+    #It's the dependency that needs to stay inside the Docker image when we're running in production.
+
+    apk add --update --no-cache --virtual .tmp-build-deps \
+        #It sets a virtual dependency package. It's kinda groups the packages that we install into this temp-build-deps and we can use this to remove these packages later on inside our Dockerfile.
+
+        build-base postgresql-dev musl-dev && \
+        #the package we needed in order to install our Postgres adaptor.
+        #上面那一段提到的"groups the packages that we install ..."指的就是這一行安裝的套件喔!
+
     /py/bin/pip install -r /tmp/requirements.txt &&\
     #install the requirements inside the Docker image.
     #actually this is installed inside the virtual env
@@ -53,6 +66,9 @@ RUN python -m venv /py && \
     #So it there's any file tiy do not need on the actual image, make sure to remove them as part of your build process.
     #(So ant file you just need temporarily, you add it, use it inside the Dockerfile and then remove it before the end of the Dockerfile.)
     #This can save a lot of space and speed when you're deploying your app.
+
+    apk del .tmp-build-deps && \
+    #這邊就是刪除用不到的套件
 
     adduser \ 
     #add new user inside our image. Coz it's best practice not to user the root user.

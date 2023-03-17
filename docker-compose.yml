@@ -23,3 +23,35 @@ services:
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
     #Command is used to run the service.By default 如果沒有specify command,他就會跑來run這個指令喔!還記得前面有教到的docker指令的部分媽? 這邊就是那個後半部的指令(前半部是Docker compose syntax)~如果我們沒有在cmd特別寫啥指令，最後就是會執行這裡的!
+    #This is gonna tell our app how to connect to the db
+    environment:
+      - DB_HOST=db
+      #"db"就是下面的那個db(另個service)
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+      #這邊所有的value都要和db service的value match!!
+    depends_on:
+      - db
+    #Docker will try to wait for the DB service to start before it starts the app service.
+  db:
+    #it's level with the app service.
+    image: postgres:13-alpine
+    volumes:
+      - dev-db-data:/var/postgresql/data
+      #map the directory inside the container to the named volumes(dev-db-data) on our machine.
+      #That "data" is db's data,meaning this line is saying : we're gonna store(persist) those db data into our volume.
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+      #These are used to set the initial database configuration for new db service.
+      #流程:
+      #When our db first starts, it's gonna create a db named devdb,then create the user called devuser,then password is set to be changeme.
+      #This is just the detail for our local development setup.
+      #We're not gonna use this if we were to deplay this to actual server.Coz if that's the case,we shouldn't be hardcord real credentials inside your source code.
+      #So here we just create the "dev credentials for the local development", just used in the local!!
+volumes:
+  dev-db-data:
+  #name of volume
+  #it's gonna store it in the default location on the file system that it does for the named volumes
